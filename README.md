@@ -200,7 +200,6 @@ they did not prevent execution.
 Runtime outputs go to ignored `artifacts/` and `datasets/taxi/`; checked-in evidence
 is a snapshot of the successful local run. Raw downloads, generated models,
 virtual environments, caches, and local run registries are excluded from Git.
-See [GITHUB_UPLOAD.md](GITHUB_UPLOAD.md) for the remaining GitHub upload steps.
 
 **Instructor attribution:** based on
 [Kedar-V/automl-research-lab, branch `refactor/lab-solution-layout`](https://github.com/Kedar-V/automl-research-lab/tree/refactor/lab-solution-layout),

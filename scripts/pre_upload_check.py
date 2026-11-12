@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = [
-    'README.md', 'GITHUB_UPLOAD.md', 'requirements-taxi.txt',
+    'README.md', 'requirements-taxi.txt',
     'infra/compose.taxi.yml', 'infra/Dockerfile.taxi', 'infra/Dockerfile.taxi-airflow',
     'infra/Dockerfile.frontend', 'solution/airflow/dags/nyc_taxi_demand.py',
     'solution/langgraph/graph.py', 'solution/langgraph/taxi_regression.py',
@@ -36,7 +36,7 @@ assert set(evaluation['holdout_metrics'])=={'mae','rmse','r2'}
 assert evaluation['input_origin'].startswith('PostgreSQL export')
 for line in (ROOT/'evidence/events.jsonl').read_text().splitlines():
     json.dumps(json.loads(line),allow_nan=False)
-for name in ['README.md','GITHUB_UPLOAD.md','evidence/README.md','screenshots/README.md']:
+for name in ['README.md','evidence/README.md','screenshots/README.md']:
     for target in re.findall(r'\]\(([^)]+)\)',(ROOT/name).read_text()):
         if not re.match(r'https?://',target):
             assert (ROOT/name).parent.joinpath(target.split('#')[0]).exists(), f'Broken link in {name}: {target}'
