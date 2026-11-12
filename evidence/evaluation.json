@@ -1,0 +1,400 @@
+{
+  "dataset_path": "/repo/datasets/taxi/taxi_hourly.csv",
+  "target_column": "pickup_count",
+  "cycles": 3,
+  "best_val_f1": null,
+  "best_val_mae": 3.816131830215454,
+  "test_evaluations": 1,
+  "best_spec": {
+    "experiment_id": "exp-2",
+    "model_family": "xgboost_regressor",
+    "hyperparameters": {
+      "n_estimators": 180,
+      "max_depth": 5,
+      "learning_rate": 0.08,
+      "min_child_weight": 10
+    }
+  },
+  "holdout_metrics": {
+    "mae": 3.7393152713775635,
+    "rmse": 12.041727631270486,
+    "r2": 0.9577643275260925
+  },
+  "verdict": {
+    "action": "accept",
+    "observation": "Validation MAE 3.8675; best 3.8161. Lower is better.",
+    "next_action": "Lock selected model and evaluate test once."
+  },
+  "stop_reason": "maximum_cycles_model_selected",
+  "profile": {
+    "task": "one-hour-ahead regression",
+    "features": [
+      "LocationID",
+      "hour",
+      "weekday",
+      "day",
+      "weekend",
+      "lag_1",
+      "lag_24",
+      "lag_168"
+    ],
+    "n_train": 89040,
+    "n_validation": 31800,
+    "train_start": "2025-01-08 00:00:00",
+    "train_end": "2025-01-21 23:00:00",
+    "validation_start": "2025-01-22 00:00:00",
+    "validation_end": "2025-01-26 23:00:00",
+    "notes": [
+      "Test labels excluded from profiling and selection.",
+      "Rolling one-hour forecasts; prior actual demand becomes available each hour.",
+      "Only shifted demand and known calendar features are allowed."
+    ],
+    "recommended_drops": [
+      "pickup_count",
+      "target_hour",
+      "forecast_origin",
+      "Borough",
+      "Zone",
+      "service_zone"
+    ]
+  },
+  "memory": {
+    "history": [
+      {
+        "cycle": 1,
+        "spec": {
+          "experiment_id": "exp-1",
+          "model_family": "seasonal_naive",
+          "hyperparameters": {}
+        },
+        "validation_metrics": {
+          "mae": 4.536069182389937,
+          "rmse": 15.04273890322809,
+          "r2": 0.9416885152975811
+        },
+        "verdict": {
+          "action": "revise",
+          "observation": "Validation MAE 4.5361; best 4.5361. Lower is better.",
+          "next_action": "Use the next bounded experiment."
+        }
+      },
+      {
+        "cycle": 2,
+        "spec": {
+          "experiment_id": "exp-2",
+          "model_family": "xgboost_regressor",
+          "hyperparameters": {
+            "n_estimators": 180,
+            "max_depth": 5,
+            "learning_rate": 0.08,
+            "min_child_weight": 10
+          }
+        },
+        "validation_metrics": {
+          "mae": 3.816131830215454,
+          "rmse": 12.224057500973618,
+          "r2": 0.9614937901496887
+        },
+        "verdict": {
+          "action": "revise",
+          "observation": "Validation MAE 3.8161; best 3.8161. Lower is better.",
+          "next_action": "Use the next bounded experiment."
+        }
+      },
+      {
+        "cycle": 3,
+        "spec": {
+          "experiment_id": "exp-3",
+          "model_family": "xgboost_regressor",
+          "hyperparameters": {
+            "n_estimators": 260,
+            "max_depth": 7,
+            "learning_rate": 0.05,
+            "min_child_weight": 15
+          }
+        },
+        "validation_metrics": {
+          "mae": 3.867493152618408,
+          "rmse": 12.389661946337812,
+          "r2": 0.960443377494812
+        },
+        "verdict": {
+          "action": "accept",
+          "observation": "Validation MAE 3.8675; best 3.8161. Lower is better.",
+          "next_action": "Lock selected model and evaluate test once."
+        }
+      }
+    ],
+    "findings": [],
+    "lessons": [
+      "Validation MAE 4.5361; best 4.5361. Lower is better.",
+      "Validation MAE 3.8161; best 3.8161. Lower is better.",
+      "Validation MAE 3.8675; best 3.8161. Lower is better."
+    ]
+  },
+  "model": "deterministic",
+  "steps": [
+    {
+      "node": "data_scientist",
+      "note": "Chronological audit; holdout sealed",
+      "used_llm": false,
+      "output": {
+        "task": "one-hour-ahead regression",
+        "features": [
+          "LocationID",
+          "hour",
+          "weekday",
+          "day",
+          "weekend",
+          "lag_1",
+          "lag_24",
+          "lag_168"
+        ],
+        "n_train": 89040,
+        "n_validation": 31800,
+        "train_start": "2025-01-08 00:00:00",
+        "train_end": "2025-01-21 23:00:00",
+        "validation_start": "2025-01-22 00:00:00",
+        "validation_end": "2025-01-26 23:00:00",
+        "notes": [
+          "Test labels excluded from profiling and selection.",
+          "Rolling one-hour forecasts; prior actual demand becomes available each hour.",
+          "Only shifted demand and known calendar features are allowed."
+        ],
+        "recommended_drops": [
+          "pickup_count",
+          "target_hour",
+          "forecast_origin",
+          "Borough",
+          "Zone",
+          "service_zone"
+        ]
+      }
+    },
+    {
+      "node": "hypothesis_generator",
+      "note": "Establish same-hour last-week seasonal naive demand.",
+      "used_llm": false,
+      "output": {
+        "direction": "Establish same-hour last-week seasonal naive demand.",
+        "evidence": null,
+        "focus": "validation MAE only"
+      }
+    },
+    {
+      "node": "ml_engineer",
+      "note": "seasonal_naive \u00b7 validation MAE=4.5361",
+      "used_llm": false,
+      "status": "succeeded",
+      "experiment_id": "exp-1",
+      "model_family": "seasonal_naive",
+      "validation_metrics": {
+        "mae": 4.536069182389937,
+        "rmse": 15.04273890322809,
+        "r2": 0.9416885152975811
+      },
+      "duration_seconds": 0.1709567909999805,
+      "spec": {
+        "experiment_id": "exp-1",
+        "model_family": "seasonal_naive",
+        "hyperparameters": {}
+      },
+      "output": {
+        "status": "succeeded",
+        "validation_metrics": {
+          "mae": 4.536069182389937,
+          "rmse": 15.04273890322809,
+          "r2": 0.9416885152975811
+        },
+        "duration_seconds": 0.1709567909999805
+      }
+    },
+    {
+      "node": "judge",
+      "note": "Validation MAE 4.5361; best 4.5361. Lower is better.",
+      "used_llm": false,
+      "verdict": {
+        "action": "revise",
+        "observation": "Validation MAE 4.5361; best 4.5361. Lower is better.",
+        "next_action": "Use the next bounded experiment."
+      }
+    },
+    {
+      "node": "memory_writer",
+      "note": "Persisted validation experiments and lessons",
+      "used_llm": false
+    },
+    {
+      "node": "context_builder",
+      "note": "History and judge evidence \u2192 next hypothesis",
+      "used_llm": false
+    },
+    {
+      "node": "hypothesis_generator",
+      "note": "Use boosted trees to combine recent demand with weekly seasonality and calendar effects.",
+      "used_llm": false,
+      "output": {
+        "direction": "Use boosted trees to combine recent demand with weekly seasonality and calendar effects.",
+        "evidence": {
+          "cycle": 1,
+          "spec": {
+            "experiment_id": "exp-1",
+            "model_family": "seasonal_naive",
+            "hyperparameters": {}
+          },
+          "validation_metrics": {
+            "mae": 4.536069182389937,
+            "rmse": 15.04273890322809,
+            "r2": 0.9416885152975811
+          },
+          "verdict": {
+            "action": "revise",
+            "observation": "Validation MAE 4.5361; best 4.5361. Lower is better.",
+            "next_action": "Use the next bounded experiment."
+          }
+        },
+        "focus": "validation MAE only"
+      }
+    },
+    {
+      "node": "ml_engineer",
+      "note": "xgboost_regressor \u00b7 validation MAE=3.8161",
+      "used_llm": false,
+      "status": "succeeded",
+      "experiment_id": "exp-2",
+      "model_family": "xgboost_regressor",
+      "validation_metrics": {
+        "mae": 3.816131830215454,
+        "rmse": 12.224057500973618,
+        "r2": 0.9614937901496887
+      },
+      "duration_seconds": 0.38146975000000793,
+      "spec": {
+        "experiment_id": "exp-2",
+        "model_family": "xgboost_regressor",
+        "hyperparameters": {
+          "n_estimators": 180,
+          "max_depth": 5,
+          "learning_rate": 0.08,
+          "min_child_weight": 10
+        }
+      },
+      "output": {
+        "status": "succeeded",
+        "validation_metrics": {
+          "mae": 3.816131830215454,
+          "rmse": 12.224057500973618,
+          "r2": 0.9614937901496887
+        },
+        "duration_seconds": 0.38146975000000793
+      }
+    },
+    {
+      "node": "judge",
+      "note": "Validation MAE 3.8161; best 3.8161. Lower is better.",
+      "used_llm": false,
+      "verdict": {
+        "action": "revise",
+        "observation": "Validation MAE 3.8161; best 3.8161. Lower is better.",
+        "next_action": "Use the next bounded experiment."
+      }
+    },
+    {
+      "node": "memory_writer",
+      "note": "Persisted validation experiments and lessons",
+      "used_llm": false
+    },
+    {
+      "node": "context_builder",
+      "note": "History and judge evidence \u2192 next hypothesis",
+      "used_llm": false
+    },
+    {
+      "node": "hypothesis_generator",
+      "note": "Increase tree capacity to capture zone interactions.",
+      "used_llm": false,
+      "output": {
+        "direction": "Increase tree capacity to capture zone interactions.",
+        "evidence": {
+          "cycle": 2,
+          "spec": {
+            "experiment_id": "exp-2",
+            "model_family": "xgboost_regressor",
+            "hyperparameters": {
+              "n_estimators": 180,
+              "max_depth": 5,
+              "learning_rate": 0.08,
+              "min_child_weight": 10
+            }
+          },
+          "validation_metrics": {
+            "mae": 3.816131830215454,
+            "rmse": 12.224057500973618,
+            "r2": 0.9614937901496887
+          },
+          "verdict": {
+            "action": "revise",
+            "observation": "Validation MAE 3.8161; best 3.8161. Lower is better.",
+            "next_action": "Use the next bounded experiment."
+          }
+        },
+        "focus": "validation MAE only"
+      }
+    },
+    {
+      "node": "ml_engineer",
+      "note": "xgboost_regressor \u00b7 validation MAE=3.8675",
+      "used_llm": false,
+      "status": "succeeded",
+      "experiment_id": "exp-3",
+      "model_family": "xgboost_regressor",
+      "validation_metrics": {
+        "mae": 3.867493152618408,
+        "rmse": 12.389661946337812,
+        "r2": 0.960443377494812
+      },
+      "duration_seconds": 0.5235638330000256,
+      "spec": {
+        "experiment_id": "exp-3",
+        "model_family": "xgboost_regressor",
+        "hyperparameters": {
+          "n_estimators": 260,
+          "max_depth": 7,
+          "learning_rate": 0.05,
+          "min_child_weight": 15
+        }
+      },
+      "output": {
+        "status": "succeeded",
+        "validation_metrics": {
+          "mae": 3.867493152618408,
+          "rmse": 12.389661946337812,
+          "r2": 0.960443377494812
+        },
+        "duration_seconds": 0.5235638330000256
+      }
+    },
+    {
+      "node": "judge",
+      "note": "Validation MAE 3.8675; best 3.8161. Lower is better.",
+      "used_llm": false,
+      "verdict": {
+        "action": "accept",
+        "observation": "Validation MAE 3.8675; best 3.8161. Lower is better.",
+        "next_action": "Lock selected model and evaluate test once."
+      }
+    },
+    {
+      "node": "holdout_eval",
+      "note": "Selected model only; sealed test evaluated once",
+      "used_llm": false,
+      "metrics": {
+        "mae": 3.7393152713775635,
+        "rmse": 12.041727631270486,
+        "r2": 0.9577643275260925
+      }
+    }
+  ],
+  "runtime_seconds": 1.7865512930000023,
+  "input_origin": "PostgreSQL export (verify export_manifest.json)"
+}

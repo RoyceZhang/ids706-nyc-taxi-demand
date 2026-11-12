@@ -1,0 +1,4 @@
+FROM apache/airflow:2.10.4-python3.11
+USER airflow
+RUN pip install --no-cache-dir numpy==1.26.4 pandas==2.1.4 pyarrow==19.0.1 psycopg2-binary==2.9.10 matplotlib==3.9.4 scikit-learn==1.6.1
+ENV MPLCONFIGDIR=/tmp/matplotlib

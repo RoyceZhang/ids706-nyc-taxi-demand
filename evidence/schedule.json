@@ -1,0 +1,45 @@
+{
+  "dag_display_name": "nyc_taxi_demand",
+  "dag_id": "nyc_taxi_demand",
+  "default_view": "grid",
+  "description": null,
+  "file_token": "[omitted transient Airflow token]",
+  "fileloc": "/opt/airflow/dags/solution/nyc_taxi_demand.py",
+  "has_import_errors": false,
+  "has_task_concurrency_limits": false,
+  "is_active": true,
+  "is_paused": false,
+  "is_subdag": false,
+  "last_expired": null,
+  "last_parsed_time": "2026-11-12T22:24:55.853551+00:00",
+  "last_pickled": null,
+  "max_active_runs": 1,
+  "max_active_tasks": 4,
+  "max_consecutive_failed_dag_runs": 0,
+  "next_dagrun": "2026-11-12T06:00:00+00:00",
+  "next_dagrun_create_after": null,
+  "next_dagrun_data_interval_end": "2026-11-13T06:00:00+00:00",
+  "next_dagrun_data_interval_start": "2026-11-12T06:00:00+00:00",
+  "owners": [
+    "airflow"
+  ],
+  "pickle_id": null,
+  "root_dag_id": null,
+  "schedule_interval": {
+    "__type": "CronExpression",
+    "value": "0 6 * * *"
+  },
+  "scheduler_lock": null,
+  "tags": [
+    {
+      "name": "IDS706"
+    },
+    {
+      "name": "taxi"
+    },
+    {
+      "name": "regression"
+    }
+  ],
+  "timetable_description": "At 06:00"
+}

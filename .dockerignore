@@ -1,0 +1,13 @@
+.git
+.venv
+**/node_modules
+frontend/dist
+artifacts
+datasets/taxi
+screenshots
+evidence
+data
+**/__pycache__
+.pytest_cache
+.env
+.env.*

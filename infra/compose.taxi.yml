@@ -1,0 +1,168 @@
+name: ids706-nyc-taxi
+services:
+  airflow-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U airflow -d airflow
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+    - airflow_db:/var/lib/postgresql/data
+    networks:
+    - automl
+  airflow-init:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.taxi-airflow
+    depends_on:
+      airflow-db:
+        condition: service_healthy
+    environment: &id001
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db/airflow
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:-oTWC6DY6QwwfP7e31V1vCCipJr_eSju8hGTVr9yiJSU=}
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
+      AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session
+      AIRFLOW__SCHEDULER__MIN_FILE_PROCESS_INTERVAL: '5'
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: '30'
+      _AIRFLOW_DB_MIGRATE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_ADMIN_USER:-admin}
+      _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-admin}
+      PYTHONPATH: /repo
+      SOLUTION_LOOP_GATEWAY_URL: http://gateway:8000
+      TAXI_DATABASE_URL: postgresql://taxi:taxi@taxi-db:5432/taxi
+      AIRFLOW__CORE__PARALLELISM: '4'
+    volumes: &id002
+    - ../lab/airflow/dags:/opt/airflow/dags/lab
+    - ../solution/airflow/dags:/opt/airflow/dags/solution
+    - ..:/repo
+    - ../datasets:/repo/datasets
+    - ../solution/langgraph:/repo/solution/langgraph
+    - ../artifacts/airflow:/repo/artifacts/airflow
+    user: 0:0
+    entrypoint: /bin/bash
+    command:
+    - -c
+    - 'mkdir -p /repo/artifacts/airflow/runs /repo/artifacts/taxi /repo/datasets/airflow
+      /repo/datasets/taxi/raw
+
+      chown -R airflow:root /repo/artifacts /repo/datasets/taxi /opt/airflow
+
+      exec /entrypoint airflow version
+
+      '
+    networks:
+    - automl
+  airflow-webserver:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.taxi-airflow
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      airflow-db:
+        condition: service_healthy
+    environment: *id001
+    volumes: *id002
+    user: '50000:0'
+    command: webserver
+    ports:
+    - 8088:8080
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - --fail
+      - http://localhost:8080/health
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+    networks:
+    - automl
+  airflow-scheduler:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.taxi-airflow
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      airflow-db:
+        condition: service_healthy
+      taxi-db:
+        condition: service_healthy
+    environment: *id001
+    volumes: *id002
+    user: '50000:0'
+    command: scheduler
+    networks:
+    - automl
+  taxi-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: taxi
+      POSTGRES_USER: taxi
+      POSTGRES_PASSWORD: taxi
+    ports:
+    - 5433:5432
+    volumes:
+    - taxi_db:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U taxi -d taxi
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+    - automl
+  gateway:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.taxi
+    environment:
+      PYTHONPATH: /repo:/repo/advanced
+      DATASETS_DIR: /repo/datasets/taxi
+      SOLUTION_LOOP_ROOT: /repo/solution/langgraph
+      LAB_LOOP_ROOT: /repo/lab/langgraph
+      LOOP_RUNS_PATH: /repo/artifacts/taxi/run_history.json
+      PROJECT_DATA_DIR: /repo/artifacts/taxi/projects
+      REDIS_URL: redis://127.0.0.1:6379
+      TAXI_DATABASE_URL: postgresql://taxi:taxi@taxi-db:5432/taxi
+    volumes:
+    - ..:/repo
+    ports:
+    - 8000:8000
+    depends_on:
+      taxi-db:
+        condition: service_healthy
+    networks:
+    - automl
+  frontend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.frontend
+    ports:
+    - 5173:5173
+    environment:
+      GATEWAY_PROXY_URL: http://gateway:8000
+    depends_on:
+    - gateway
+    networks:
+    - automl
+networks:
+  automl:
+    driver: bridge
+volumes:
+  airflow_db: {}
+  taxi_db: {}
